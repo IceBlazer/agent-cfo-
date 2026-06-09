@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AgentCFO</title>
+    <style>
+      body {
+        width: 280px;
+        margin: 0;
+        padding: 16px;
+        font-family: system-ui, sans-serif;
+        background: #0f1419;
+        color: #e8edf5;
+      }
+      h1 {
+        font-size: 1rem;
+        margin: 0 0 12px;
+      }
+      label {
+        display: block;
+        font-size: 0.8rem;
+        margin-bottom: 4px;
+        color: #9fb0c5;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #3a4a5e;
+        background: #161d27;
+        color: #e8edf5;
+        margin-bottom: 12px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #f5c518;
+        color: #0f1419;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      p {
+        font-size: 0.78rem;
+        color: #9fb0c5;
+        margin: 10px 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AgentCFO APE</h1>
+    <label for="apiBase">Backend URL</label>
+    <input id="apiBase" type="text" value="http://127.0.0.1:8787" />
+    <button id="save">Save</button>
+    <p>Intercepts checkout clicks and routes audits to the Python backend.</p>
+    <script src="popup.js"></script>
+  </body>
+</html>

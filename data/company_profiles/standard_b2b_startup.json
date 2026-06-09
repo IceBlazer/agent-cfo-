@@ -1,0 +1,32 @@
+{
+  "profile_id": "standard_b2b_startup",
+  "mission_hub": {
+    "statement": "Prioritize sustainable or open-source infrastructure over raw cost savings.",
+    "principles": [
+      "Favor vendors with SOC 2 Type II certification for production tooling.",
+      "Avoid single-vendor lock-in where a credible open-source alternative exists.",
+      "Deprioritize vanity SaaS subscriptions that duplicate internal capabilities."
+    ]
+  },
+  "stack_registry": {
+    "active_subscriptions": [
+      {"tool": "Microsoft Teams", "seats_total": 50, "seats_used": 38, "cost_per_seat_monthly_cents": 1200, "category": "collaboration"},
+      {"tool": "Zoom Business", "seats_total": 15, "seats_used": 3, "cost_per_seat_monthly_cents": 1999, "category": "collaboration"},
+      {"tool": "GitHub Enterprise", "seats_total": 25, "seats_used": 22, "cost_per_seat_monthly_cents": 2100, "category": "developer_tools"},
+      {"tool": "Linear", "seats_total": 30, "seats_used": 28, "cost_per_seat_monthly_cents": 800, "category": "project_management"},
+      {"tool": "Notion Business", "seats_total": 40, "seats_used": 35, "cost_per_seat_monthly_cents": 1500, "category": "documentation"}
+    ]
+  },
+  "policy_spoke": {
+    "expense_policies": [
+      {"rule_id": "EP-001", "description": "Any single software seat over $100/month requires executive approval.", "threshold_cents": 10000, "unit": "per_seat_monthly"},
+      {"rule_id": "EP-002", "description": "Departmental software spend may not exceed 100% of quarterly allocation without CFO override.", "threshold_percent": 100, "unit": "department_budget"},
+      {"rule_id": "EP-003", "description": "Duplicate tooling purchases require written justification referencing Stack Registry.", "unit": "duplicate_detection"}
+    ],
+    "department_budgets": {
+      "Engineering": {"quarter": "Q3", "allocation_cents": 1500000, "spent_cents": 1380000},
+      "Development": {"quarter": "Q3", "allocation_cents": 800000, "spent_cents": 780000},
+      "Sales": {"quarter": "Q3", "allocation_cents": 500000, "spent_cents": 320000}
+    }
+  }
+}

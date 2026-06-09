@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "AgentCFO — APE Procurement Gatekeeper",
+  "version": "1.0.0",
+  "description": "Intercepts corporate card checkouts, runs fiscal alignment audit, and controls Stripe authorization holds.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["http://127.0.0.1:8787/*", "http://localhost:8787/*", "<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "AgentCFO",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["hardwall.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
