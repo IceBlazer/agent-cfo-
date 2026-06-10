@@ -3,58 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <title>AgentCFO</title>
+    <link rel="stylesheet" href="css/liquid-glass.css" />
     <style>
       body {
-        width: 280px;
+        width: 320px;
         margin: 0;
-        padding: 16px;
-        font-family: system-ui, sans-serif;
-        background: #0f1419;
-        color: #e8edf5;
+        padding: 18px;
+        background: linear-gradient(165deg, var(--glass-sky), var(--glass-mint));
+        color: var(--glass-forest);
+        font-family: var(--glass-font);
       }
-      h1 {
-        font-size: 1rem;
-        margin: 0 0 12px;
-      }
+      h1 { font-size: 1rem; margin: 10px 0 4px; }
+      p { font-size: 0.78rem; margin: 0 0 14px; color: var(--glass-forest-soft); line-height: 1.45; }
       label {
         display: block;
-        font-size: 0.8rem;
-        margin-bottom: 4px;
-        color: #9fb0c5;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--glass-leaf);
+        margin-bottom: 6px;
       }
-      input {
+      .field { margin-bottom: 14px; }
+      select, input {
         width: 100%;
         box-sizing: border-box;
-        padding: 8px;
-        border-radius: 6px;
-        border: 1px solid #3a4a5e;
-        background: #161d27;
-        color: #e8edf5;
-        margin-bottom: 12px;
+        font-family: var(--glass-font);
+        font-size: 0.88rem;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--glass-line);
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--glass-forest);
       }
-      button {
-        width: 100%;
-        padding: 10px;
-        border: none;
-        border-radius: 6px;
-        background: #f5c518;
-        color: #0f1419;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      p {
-        font-size: 0.78rem;
-        color: #9fb0c5;
-        margin: 10px 0 0;
-      }
+      #save { width: 100%; margin-top: 4px; }
     </style>
   </head>
   <body>
-    <h1>AgentCFO APE</h1>
-    <label for="apiBase">Backend URL</label>
-    <input id="apiBase" type="text" value="http://127.0.0.1:8787" />
-    <button id="save">Save</button>
-    <p>Intercepts checkout clicks and routes audits to the Python backend.</p>
+    <span class="ape-glass-badge">Thin Client</span>
+    <h1>AgentCFO Bridge</h1>
+    <p>Extension scrapes DOM only. Python hub runs Exa, Stripe, and OpenAI evaluators.</p>
+
+    <div class="field">
+      <label for="apiBase">Python hub URL</label>
+      <input id="apiBase" type="text" value="http://127.0.0.1:8787" />
+    </div>
+
+    <div class="field">
+      <label for="riskTolerance">Backend timeout fallback</label>
+      <select id="riskTolerance">
+        <option value="fail-closed">Fail-closed (block + retry)</option>
+        <option value="fail-open">Fail-open (soft warning + proceed)</option>
+      </select>
+    </div>
+
+    <button id="save" class="ape-glass-btn ape-glass-btn--primary">Save</button>
     <script src="popup.js"></script>
   </body>
 </html>

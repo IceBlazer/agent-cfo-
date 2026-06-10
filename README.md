@@ -1,65 +1,68 @@
 # AgentCFO — Autonomous Procurement Engine (APE)
 
-Corporate checkout gatekeeper: a Chrome extension intercepts purchases, a Python hub-and-spoke backend audits them against company DNA, Exa market benchmarks, and Stripe financial health, then approves or declines the Stripe Issuing authorization hold.
+Python-heavy procurement gatekeeper. The Chrome extension is a **thin client** — it scrapes DOM, renders Liquid Glass UI, and delegates all intelligence to the Python hub.
 
-## Architecture
+## Thin-client bridge architecture
 
 ```
-Browser DOM Checkout
-       ↓
-Spoke: Extension (cart intercept + hard-wall UI)
-       ↓
-Spoke: Cards (Mission Hub, Stack Registry, Policy Spoke)
-Spoke: Stripe Tracker (balances, runway, auth hold)
-       ↓
-Agent 1 — Search Strategist (OpenAI) → Exa Instant scan
-       ↓
-Agent 2 — CFO Auditor (OpenAI)
-       ↓
-Hard-Wall Overlay → Override (approve) / Cancel (decline)
+Phase 1  spoke_extension.js     scrapeCartData · freezeCheckoutEvent · PII sanitize
+Phase 2  python-bridge.js       transmitToPythonHub · awaitAuditDecision (4.5s timeout)
+Phase 3  hardwall-ui.js         populateGlassCapsules · renderAIContextRequest · toggleWarningState
+Phase 4  hardwall-ui.js         handleAbortClick · handleOverrideSubmit → Stripe via Python
+         background.js           fetch proxy to Python hub (CORS / MV3 service worker)
 ```
 
 ## Quick start
 
-### 1. Python backend
+### 1. Python hub (required)
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate        # Windows
+.venv\Scripts\activate
 pip install -r requirements.txt
-copy .env.example .env        # optional: add API keys
 python api_server.py          # http://127.0.0.1:8787
 ```
 
-CLI demo (simulated cart, no extension):
-
-```bash
-python main.py
-```
-
-Works offline without API keys — spokes fall back to simulated Stripe, Exa, and OpenAI responses.
-
 ### 2. Chrome extension
 
-1. Open `chrome://extensions`
-2. Enable **Developer mode**
-3. **Load unpacked** → select the `extension/` folder
-4. Open `extension/demo_checkout.html` in Chrome
-5. Click **Place Order** — the hard-wall should appear after the audit
+1. `chrome://extensions` → Developer mode → **Load unpacked** → `extension/`
+2. Open `extension/demo_checkout.html`
+3. Click **Place Order**
 
-Configure backend URL via the extension popup (default `http://127.0.0.1:8787`).
+Extension popup settings:
+- **Python hub URL** — default `http://127.0.0.1:8787`
+- **Timeout fallback** — `fail-closed` (block) or `fail-open` (soft warning + proceed)
 
-## Spoke modules
+## API endpoints (v1)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/api/v1/intercept` | Full APE pipeline → UI-ready capsules JSON |
+| `POST` | `/api/v1/resolve?action=approve\|decline` | Stripe auth approve / decline |
+
+Legacy: `/api/audit`, `/api/resolve` still supported.
+
+## Extension modules
+
+| File | Role |
+|------|------|
+| `js/spoke_extension.js` | DOM mutation observers, cart scrape, checkout freeze |
+| `js/python-bridge.js` | Async bridge, 4.5s timeout, fail-open/closed fallback |
+| `js/hardwall-ui.js` | Liquid Glass overlay + resolution handshake |
+| `js/content.js` | Orchestrator wiring |
+| `css/liquid-glass.css` | Frutiger Eco glass UI |
+
+## Python spokes
 
 | Module | Role |
 |--------|------|
-| `spoke_extension.py` | Cart DOM intercept / normalization |
-| `spoke_cards.py` | Precollected company DNA |
-| `spoke_stripe_tracker.py` | Live financial health + auth hold/release |
-| `spoke_market.py` | Exa Instant market benchmarks |
-| `spoke_intelligence.py` | OpenAI Search Strategist + CFO Auditor |
-| `main.py` | CLI orchestration (reference template) |
-| `api_server.py` | HTTP API for the extension |
+| `spoke_extension.py` | Server-side cart normalization |
+| `spoke_cards.py` | Company DNA |
+| `spoke_stripe_tracker.py` | Stripe health + auth hold |
+| `spoke_market.py` | Exa benchmarks |
+| `spoke_intelligence.py` | OpenAI evaluators |
+| `api_server.py` | FastAPI hub |
+| `main.py` | CLI reference |
 
 ## Environment variables
 

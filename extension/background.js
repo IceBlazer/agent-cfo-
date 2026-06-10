@@ -6,24 +6,26 @@ async function getApiBase() {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === "APE_AUDIT") {
-    runAudit(message.payload)
-      .then(sendResponse)
-      .catch((err) => sendResponse({ error: err.message }));
+  if (message.type === "APE_INTERCEPT") {
+    runIntercept(message.payload).then(sendResponse).catch((err) => sendResponse({ error: err.message }));
     return true;
   }
 
   if (message.type === "APE_RESOLVE") {
-    runResolve(message.payload)
-      .then(sendResponse)
-      .catch((err) => sendResponse({ error: err.message }));
+    runResolve(message.payload).then(sendResponse).catch((err) => sendResponse({ error: err.message }));
+    return true;
+  }
+
+  // Legacy message types
+  if (message.type === "APE_AUDIT") {
+    runIntercept(message.payload).then(sendResponse).catch((err) => sendResponse({ error: err.message }));
     return true;
   }
 });
 
-async function runAudit(payload) {
+async function runIntercept(payload) {
   const apiBase = await getApiBase();
-  const response = await fetch(`${apiBase}/api/audit`, {
+  const response = await fetch(`${apiBase}/api/v1/intercept`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -31,19 +33,23 @@ async function runAudit(payload) {
 
   if (!response.ok) {
     const detail = await response.text();
-    throw new Error(`Audit failed (${response.status}): ${detail}`);
+    throw new Error(`Intercept failed (${response.status}): ${detail}`);
   }
 
   return response.json();
 }
 
-async function runResolve(payload) {
+async function runResolve({ auth_id, action, justification }) {
   const apiBase = await getApiBase();
-  const response = await fetch(`${apiBase}/api/resolve`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  const bridgeAction = action === "approve" || action === "override" ? "approve" : "decline";
+  const response = await fetch(
+    `${apiBase}/api/v1/resolve?action=${bridgeAction}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ auth_id, justification: justification || "" }),
+    }
+  );
 
   if (!response.ok) {
     const detail = await response.text();
