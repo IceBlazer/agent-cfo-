@@ -13,7 +13,10 @@ const SpokeExtension = (() => {
     'button[name="checkout"]',
   ];
 
-  const CHECKOUT_KEYWORDS = /place order|complete purchase|pay now|submit order|buy now|checkout/i;
+  const CHECKOUT_KEYWORDS =
+    /place order|complete purchase|pay now|submit order|buy now|checkout|subscribe|start trial|upgrade|confirm payment|^pay$/i;
+
+  const CHECKOUT_URL = /checkout|cart|billing|pricing|subscription|payment/i;
 
   const PII_PATTERNS = [
     [/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, "[EMAIL_REDACTED]"],
@@ -31,10 +34,16 @@ const SpokeExtension = (() => {
   let frozenButtons = [];
   let mutationObserver = null;
 
-  function isCheckoutPage() {
+  function detectCheckoutPage() {
+    const url = window.location.href.toLowerCase();
     const bodyText = document.body?.innerText?.slice(0, 8000) || "";
-    return /total|subtotal|amount due/i.test(bodyText) && CHECKOUT_KEYWORDS.test(bodyText);
+    const hasUrl = CHECKOUT_URL.test(url);
+    const hasPrice = /total|subtotal|amount due|\$\d+(\.\d{2})?(\/mo|\/month|\/yr|\/year)?/i.test(bodyText);
+    const hasAction = CHECKOUT_KEYWORDS.test(bodyText);
+    return (hasUrl || (hasPrice && hasAction));
   }
+
+  const isCheckoutPage = detectCheckoutPage;
 
   function findCheckoutButtons() {
     const buttons = new Set();
@@ -190,13 +199,44 @@ const SpokeExtension = (() => {
     scan();
   }
 
+  function toInterceptPayload(cart) {
+    const sanitized = sanitizePayload(cart);
+    const text = sanitized.raw_dom_text || "";
+    let billing = "unknown";
+    if (/\/mo|\/month|monthly/i.test(text)) billing = "monthly";
+    else if (/\/yr|\/year|annual|yearly/i.test(text)) billing = "yearly";
+
+    const product = sanitized.line_items?.[0]?.name || sanitized.merchant || "Software purchase";
+    const price = sanitized.amount_cents ? sanitized.amount_cents / 100 : null;
+
+    return {
+      merchant: sanitized.merchant,
+      product_name: product,
+      description: text.slice(0, 2000),
+      price,
+      billing_cycle: billing,
+      quantity: sanitized.line_items?.[0]?.quantity || 1,
+      url: sanitized.page_url || window.location.href,
+      checkout_confidence: 0.85,
+      timestamp: new Date().toISOString(),
+      raw_dom_text: text,
+      amount_cents: sanitized.amount_cents,
+      used_card_id: sanitized.used_card_id,
+    };
+  }
+
   return {
+    detectCheckoutPage,
     isCheckoutPage,
     scrapeCartData,
+    sanitizeCartPayload: sanitizePayload,
     sanitizePayload,
+    toInterceptPayload,
     freezeCheckoutEvent,
+    freezeCheckoutIfNeeded: freezeCheckoutEvent,
     unfreezeCheckout,
     triggerOriginalCheckout,
+    observeCheckoutChanges: attachMutationObservers,
     attachMutationObservers,
   };
 })();

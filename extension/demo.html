@@ -2,98 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta property="og:site_name" content="GitHub Inc." />
-    <title>AgentCFO · Demo Checkout</title>
-    <link rel="stylesheet" href="css/liquid-glass.css" />
+    <title>AgentCFO Demo Checkout</title>
+    <link rel="stylesheet" href="css/styles.css" />
     <style>
-      body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: var(--font-human);
-        color: var(--forest-text);
-        background: linear-gradient(165deg, #dff6f8 0%, #c8f0dc 50%, #e8f8ef 100%);
-      }
-      .wrap {
-        max-width: 480px;
-        margin: 0 auto;
-        padding: 40px 20px 64px;
-      }
-      .nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-      }
-      .nav span { font-size: 0.78rem; font-weight: 700; color: var(--aqua-deep); }
-      .card {
-        padding: 28px;
-        border-radius: 24px;
-        background: rgba(255, 255, 255, 0.72);
-        border: 2px solid rgba(255, 255, 255, 0.95);
-        box-shadow: 0 16px 40px rgba(47, 95, 74, 0.12), inset 0 1px 0 #fff;
-      }
-      .card h1 { margin: 0 0 4px; font-size: 1.3rem; }
-      .merchant { font-size: 0.82rem; opacity: 0.75; margin-bottom: 18px; }
-      .line { padding: 8px 0; border-bottom: 1px solid rgba(93, 170, 123, 0.2); font-size: 0.9rem; }
-      .total {
-        display: flex;
-        justify-content: space-between;
-        margin: 16px 0 22px;
-        padding-top: 14px;
-        border-top: 1px solid rgba(93, 170, 123, 0.28);
-        font-weight: 800;
-        font-size: 1.05rem;
-      }
-      #place-order {
-        width: 100%;
-        border: none;
-        border-radius: 999px;
-        padding: 14px;
-        font-family: var(--font-human);
-        font-size: 0.95rem;
-        font-weight: 800;
-        color: #fff;
-        cursor: pointer;
-        background: linear-gradient(180deg, #7dcea0, #2a9d5c);
-        box-shadow: 0 6px 18px rgba(47, 95, 74, 0.22);
-      }
-      #place-order:disabled { opacity: 0.55; cursor: wait; }
-      .hint {
-        margin-top: 20px;
-        padding: 14px;
-        border-radius: 14px;
-        font-size: 0.8rem;
-        line-height: 1.5;
-        background: rgba(200, 240, 220, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-      }
-      code { font-size: 0.78rem; }
+      body { font-family: Inter, system-ui, sans-serif; max-width: 480px; margin: 48px auto; padding: 0 16px; background: #ecfdf3; }
+      .card { background: #fff; border-radius: 18px; padding: 24px; border: 1px solid #e5e7eb; box-shadow: 0 8px 30px rgba(0,0,0,.06); }
+      button { width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 999px; background: #16a34a; color: #fff; font-weight: 700; cursor: pointer; }
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <nav>
-        <span class="ape-glass-badge">APE Demo</span>
-        <span>AgentCFO</span>
-      </nav>
-      <div class="card">
-        <h1>Checkout</h1>
-        <p class="merchant">GitHub Inc.</p>
-        <div class="line">10× GitHub Enterprise Seats — $2,100/yr</div>
-        <div class="line">Subtotal $2,100.00</div>
-        <div class="line">Tax $168.00</div>
-        <div class="total"><span>Total</span><span>$2,268.00</span></div>
-        <button type="button" id="place-order">Place Order</button>
-      </div>
-      <p class="hint">
-        Start <code>python api_server.py</code> first. Clicking Place Order opens the full Liquid Glass hard-wall.
-      </p>
+    <h1>Checkout</h1>
+    <div class="card">
+      <p><strong>Notion Team Plan</strong></p>
+      <p>$96.00 / month</p>
+      <p>Total: $96.00</p>
+      <button type="button" id="place-order">Place Order</button>
     </div>
-
+    <p style="font-size:0.82rem;color:#6b7280;margin-top:16px">Start <code>python api_server.py</code> then click Place Order.</p>
+    <script src="js/apiClient.js"></script>
+    <script src="js/storage.js"></script>
     <script src="js/spoke_extension.js"></script>
-    <script src="js/python-bridge.js"></script>
-    <script src="js/hardwall-ui.js"></script>
+    <script src="js/injectedOverlay.js"></script>
     <script src="js/demo-page.js"></script>
   </body>
 </html>

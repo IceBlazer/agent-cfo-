@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AgentCFO — APE Procurement Gatekeeper",
-  "version": "1.4.0",
-  "description": "Thin-client checkout interceptor — all intelligence runs on the Python APE backend.",
+  "name": "AgentCFO — AI Finance Assistant",
+  "version": "2.1.0",
+  "description": "Before you buy, AgentCFO checks for cheaper options, budget fit, and duplicate tools.",
   "permissions": ["storage", "activeTab"],
   "host_permissions": [
     "http://127.0.0.1:8787/*",
@@ -13,21 +13,37 @@
   "background": {
     "service_worker": "background.js"
   },
+  "icons": {
+    "16": "icons/icon-green.png",
+    "48": "icons/icon-green.png",
+    "128": "icons/icon-green.png"
+  },
   "action": {
-    "default_title": "AgentCFO",
-    "default_popup": "popup.html"
+    "default_title": "AgentCFO — AI Finance Assistant",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-green.png",
+      "48": "icons/icon-green.png"
+    }
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": [
+        "js/apiClient.js",
+        "js/storage.js",
         "js/spoke_extension.js",
-        "js/python-bridge.js",
-        "js/hardwall-ui.js",
-        "js/content.js"
+        "js/injectedOverlay.js",
+        "js/contentScript.js"
       ],
-      "css": ["css/liquid-glass.css"],
+      "css": ["css/styles.css"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["demo.html", "preview.html", "css/*", "js/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

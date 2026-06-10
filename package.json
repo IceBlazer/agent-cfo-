@@ -1,0 +1,12 @@
+{
+  "name": "agentcfo",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "api": "python api_server.py",
+    "dashboard:install": "cd dashboard && npm install",
+    "dashboard:dev": "cd dashboard && npm run dev",
+    "dashboard:build": "cd dashboard && npm run build",
+    "start": "python api_server.py"
+  }
+}

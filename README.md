@@ -1,69 +1,75 @@
-# AgentCFO — Autonomous Procurement Engine (APE)
+# AgentCFO — AI Finance Assistant for Small Business
 
-Python-heavy procurement gatekeeper. The Chrome extension is a **thin client** — it scrapes DOM, renders Liquid Glass UI, and delegates all intelligence to the Python hub.
+**Before you buy this, AgentCFO checks if there is a cheaper option, whether it fits your budget, and whether you already have something similar.**
 
-## Thin-client bridge architecture
+Two connected experiences:
+- **Chrome extension** — real-time checkout helper
+- **Dashboard** — savings, budget health, renewals, and purchase history
 
-```
-Phase 1  spoke_extension.js     scrapeCartData · freezeCheckoutEvent · PII sanitize
-Phase 2  python-bridge.js       transmitToPythonHub · awaitAuditDecision (4.5s timeout)
-Phase 3  hardwall-ui.js         populateGlassCapsules · renderAIContextRequest · toggleWarningState
-Phase 4  hardwall-ui.js         handleAbortClick · handleOverrideSubmit → Stripe via Python
-         background.js           fetch proxy to Python hub (CORS / MV3 service worker)
-```
+> AgentCFO works in two ways: the extension helps you before you buy, and the dashboard shows your savings, budget health, and next steps.
 
 ## Quick start
 
-### 1. Python hub (required)
+### 1. Python API (required)
 
-```bash
+```powershell
+cd c:\Users\18634\AgentCFO\agent-cfo-
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-python api_server.py          # http://127.0.0.1:8787
+python api_server.py
 ```
 
-### 2. Chrome extension
+API: `http://127.0.0.1:8787`  
+Dashboard (after build): `http://127.0.0.1:8787/app`
+
+### 2. Dashboard
+
+```powershell
+cd dashboard
+npm install
+npm run build
+```
+
+Dev mode with hot reload: `npm run dev` → `http://localhost:5173/app`
+
+### 3. Chrome extension
 
 1. `chrome://extensions` → Developer mode → **Load unpacked** → `extension/`
-2. Open `extension/demo_checkout.html`
-3. Click **Place Order**
+2. Click the AgentCFO icon → **Try Demo** or **Open Dashboard**
+3. On demo checkout, click **Place Order** to see the review overlay
 
-Extension popup settings:
-- **Python hub URL** — default `http://127.0.0.1:8787`
-- **Timeout fallback** — `fail-closed` (block) or `fail-open` (soft warning + proceed)
-
-## API endpoints (v1)
+## API endpoints
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| `POST` | `/api/v1/intercept` | Full APE pipeline → UI-ready capsules JSON |
-| `POST` | `/api/v1/resolve?action=approve\|decline` | Stripe auth approve / decline |
+| GET | `/api/v1/dashboard/summary` | Dashboard home metrics |
+| GET | `/api/v1/purchases/recent` | Recent activity |
+| GET | `/api/v1/financial-health` | Cash flow & budgets |
+| GET | `/api/v1/actions` | To-do / action center |
+| GET | `/api/v1/audit-log` | Decision timeline |
+| POST | `/api/v1/intercept` | Checkout review |
+| POST | `/api/v1/resolve` | Cancel / continue |
 
-Legacy: `/api/audit`, `/api/resolve` still supported.
+## Architecture
 
-## Extension modules
-
-| File | Role |
-|------|------|
-| `js/spoke_extension.js` | DOM mutation observers, cart scrape, checkout freeze |
-| `js/python-bridge.js` | Async bridge, 4.5s timeout, fail-open/closed fallback |
-| `js/hardwall-ui.js` | Liquid Glass overlay + resolution handshake |
-| `js/content.js` | Orchestrator wiring |
-| `css/liquid-glass.css` | Frutiger Eco glass UI |
-
-## Python spokes
-
-| Module | Role |
-|--------|------|
-| `spoke_extension.py` | Server-side cart normalization |
-| `spoke_cards.py` | Company DNA |
-| `spoke_stripe_tracker.py` | Stripe health + auth hold |
-| `spoke_market.py` | Exa benchmarks |
-| `spoke_intelligence.py` | OpenAI evaluators |
-| `api_server.py` | FastAPI hub |
-| `main.py` | CLI reference |
+```
+Extension (thin client)          Python hub                    Dashboard
+─────────────────────           ────────────                  ───────────
+detect checkout        →        OpenAI Evaluator 1    →       summary
+scrape + sanitize      →        Exa market scan       →       purchases
+overlay UI             →        OpenAI Evaluator 2    →       financial
+resolve action         →        Stripe + company DNA  →       to-do
+```
 
 ## Environment variables
 
-See `.env.example` for `STRIPE_TEST_KEY`, `EXA_API_KEY`, and `OPENAI_API_KEY`.
+Copy `.env.example` — never commit keys.
+
+## Demo flow
+
+1. Start `python api_server.py`
+2. Build dashboard (`npm run build` in `dashboard/`)
+3. Reload extension
+4. Extension popup → **Try Demo** → **Place Order**
+5. See savings overlay → **Open Dashboard** to view synced purchase

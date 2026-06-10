@@ -1,46 +1,51 @@
-/**
- * content.js — Thin-client orchestrator
- * Wires interceptor → Python bridge → Liquid Glass UI
- */
+/** Content script — checkout detection + overlay (thin client). */
 (() => {
-  let interceptActive = false;
+  let busy = false;
 
-  function releaseInterceptLock() {
-    interceptActive = false;
-  }
-
-  async function onCheckoutButtonFound(event, buttonEl) {
-    if (interceptActive) {
+  async function runIntercept(event, buttonEl) {
+    if (busy) {
       event.preventDefault();
       event.stopImmediatePropagation();
       return;
     }
-    interceptActive = true;
+    busy = true;
 
-    const checkoutContext = SpokeExtension.freezeCheckoutEvent(event, buttonEl);
-    const cartPayload = SpokeExtension.scrapeCartData();
+    const ctx = SpokeExtension.freezeCheckoutEvent(event, buttonEl);
+    const cart = SpokeExtension.scrapeCartData();
+    const payload = SpokeExtension.toInterceptPayload(cart);
 
-    const result = await PythonBridge.awaitAuditDecision(cartPayload);
-    const { riskTolerance } = await PythonBridge.getConfig();
+    CheckoutOverlay.showLoading();
+    await AgentStorage.setPopupState("processing");
 
-    const panelOpts = {
-      ...checkoutContext,
-      isFallback: !result.ok,
-      showFailOpen: !result.ok && riskTolerance === "fail-open",
-      onSessionEnd: releaseInterceptLock,
-    };
-
-    LiquidGlassUI.renderAuditPanel(result.data, panelOpts);
-
-    if (result.ok) {
-      // Lock held until user resolves modal (onSessionEnd)
-      return;
-    }
-
-    if (riskTolerance === "fail-closed") {
-      LiquidGlassUI.toggleWarningState(true);
+    try {
+      const review = await ApiClient.intercept(payload);
+      await AgentStorage.saveReview(review);
+      CheckoutOverlay.injectAgentCFOOverlay(review, {
+        ...ctx,
+        onDone: () => {
+          busy = false;
+        },
+      });
+    } catch (err) {
+      const isTimeout = err.name === "AbortError" || /timeout|aborted/i.test(err.message);
+      CheckoutOverlay.showTimeoutFallback(
+        () => {
+          CheckoutOverlay.remove();
+          SpokeExtension.unfreezeCheckout();
+          busy = false;
+        },
+        () => {
+          busy = false;
+          runIntercept(event, buttonEl);
+        }
+      );
+      if (!isTimeout) {
+        CheckoutOverlay.remove();
+        SpokeExtension.unfreezeCheckout();
+        busy = false;
+      }
     }
   }
 
-  SpokeExtension.attachMutationObservers(onCheckoutButtonFound);
+  SpokeExtension.observeCheckoutChanges(runIntercept);
 })();

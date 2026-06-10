@@ -1,50 +1,37 @@
-/**
- * Standalone demo page — runs inside extension (chrome-extension://)
- * Does not rely on content scripts (which fail on file:// URLs).
- */
+/** Demo checkout — Notion Team Plan example. */
 (() => {
-  const DEMO_CART = {
-    raw_dom_text:
-      "Item: 10x GitHub Enterprise Seats - Price: $2,100/yr | Subtotal: $2,100.00 | Tax: $168.00 | Total: $2,268.00",
-    merchant: "GitHub Inc.",
-    amount_cents: 226800,
-    currency: "usd",
-    department: "Development",
-    used_card_id: "ic_extension_card",
-    category: "developer_tools",
-    page_url: "demo",
-  };
-
-  let intercepting = false;
-
-  document.getElementById("place-order")?.addEventListener("click", async (event) => {
-    if (intercepting) return;
-    intercepting = true;
-    event.preventDefault();
-
-    const btn = event.currentTarget;
+  document.getElementById("place-order")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const btn = e.currentTarget;
     btn.disabled = true;
-    btn.textContent = "Held — audit in progress…";
 
-    const checkoutContext = SpokeExtension.freezeCheckoutEvent(event, btn);
-    const cartPayload = { ...DEMO_CART, ...SpokeExtension.scrapeCartData() };
+    const ctx = SpokeExtension.freezeCheckoutIfNeeded(e, btn);
+    const payload = {
+      merchant: "Notion",
+      product_name: "Notion Team Plan",
+      description: "Notion Team Plan | $96.00/month | Total: $96.00",
+      raw_dom_text: "Notion Team Plan | $96.00/month | Total: $96.00",
+      price: 96,
+      billing_cycle: "monthly",
+      quantity: 1,
+      url: "demo",
+      checkout_confidence: 1,
+      timestamp: new Date().toISOString(),
+    };
 
-    const result = await PythonBridge.awaitAuditDecision(cartPayload);
-    const { riskTolerance } = await PythonBridge.getConfig();
-
-    LiquidGlassUI.renderAuditPanel(result.data, {
-      ...checkoutContext,
-      isFallback: !result.ok,
-      showFailOpen: !result.ok && riskTolerance === "fail-open",
-      onSessionEnd: () => {
-        intercepting = false;
-        btn.disabled = false;
-        btn.textContent = "Place Order";
-      },
-    });
-
-    if (!result.ok && riskTolerance === "fail-closed") {
-      LiquidGlassUI.toggleWarningState(true);
+    InjectedOverlay.showLoading();
+    try {
+      const review = await ApiClient.sendInterceptPayload(payload);
+      await AgentStorage.saveReview(review);
+      InjectedOverlay.injectAgentCFOOverlay(review, {
+        ...ctx,
+        onDone: () => { btn.disabled = false; },
+      });
+    } catch (err) {
+      alert(err.message);
+      InjectedOverlay.remove();
+      SpokeExtension.unfreezeCheckout();
+      btn.disabled = false;
     }
   });
 })();

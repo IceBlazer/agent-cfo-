@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  @apply bg-brand-light text-gray-900 antialiased;
+}
