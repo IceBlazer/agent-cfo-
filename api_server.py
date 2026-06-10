@@ -9,8 +9,12 @@ import os
 import re
 from typing import Any, Literal
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from spoke_cards import get_company_dna
@@ -30,6 +34,7 @@ app.add_middleware(
 )
 
 PROFILE_ID = os.getenv("APE_COMPANY_PROFILE", "standard_b2b_startup")
+_EXTENSION_DIR = Path(__file__).parent / "extension"
 
 
 class InterceptRequest(BaseModel):
@@ -190,6 +195,21 @@ def _run_intercept_pipeline(cart_data: dict[str, Any]) -> dict[str, Any]:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "agentcfo-ape", "version": "1.1.0"}
+
+
+# Extension assets for http://127.0.0.1:8787/demo (JS/CSS for demo page)
+if _EXTENSION_DIR.exists():
+    app.mount("/css", StaticFiles(directory=_EXTENSION_DIR / "css"), name="ext-css")
+    app.mount("/js", StaticFiles(directory=_EXTENSION_DIR / "js"), name="ext-js")
+
+
+@app.get("/demo")
+def demo_checkout_page() -> FileResponse:
+    """HTTP checkout demo — content scripts also run here (unlike file:// URLs)."""
+    page = _EXTENSION_DIR / "demo.html"
+    if not page.exists():
+        page = _EXTENSION_DIR / "demo_checkout.html"
+    return FileResponse(page, media_type="text/html")
 
 
 @app.post("/api/v1/intercept")

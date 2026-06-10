@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AgentCFO · UI Preview</title>
+    <link rel="stylesheet" href="css/liquid-glass.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font-human);
+        background: linear-gradient(165deg, #dff6f8, #c8f0dc);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .note {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="note">Mock data preview — no Python backend required</p>
+    <script src="js/spoke_extension.js"></script>
+    <script src="js/python-bridge.js"></script>
+    <script src="js/hardwall-ui.js"></script>
+    <script>
+      const MOCK = {
+        pending_auth_id: "iauth_preview_mock",
+        audit: {
+          is_flagged: true,
+          missing_context_question:
+            "Why is this premium enterprise tier required over our unutilized alternative software licenses?",
+          capsules: {
+            market: {
+              source: "Exa",
+              headline: "Market Benchmark Baseline",
+              label: "Market Intelligence (Exa API Data)",
+              target_display: "$899/mo",
+              fair_rate_display: "$450/mo",
+              efficiency_delta: -50,
+              body: "Vendor charging ~50% above standard B2B volume rates for this tier.",
+            },
+            financial: {
+              source: "Stripe",
+              headline: "Stripe Corporate Ledger",
+              label: "Financial Health (Stripe API Data)",
+              budget_fill_percent: 92,
+              budget_label: "Q3 Team Software Budget At Peak Capacity",
+              body: "Cash runway ~14 months; departmental impact is elevated.",
+            },
+            company: {
+              source: "DNA",
+              headline: "Corporate DNA Sync",
+              label: "Strategic Alignment (Precollected DNA Data)",
+              checklist: [
+                { text: "12 unused Microsoft Teams licenses detected", status: "warn" },
+                { text: "Mission alignment verified against sustainability charter", status: "ok" },
+                { text: "Expense policy EP-001 threshold exceeded", status: "warn" },
+              ],
+            },
+          },
+        },
+      };
+
+      LiquidGlassUI.renderAuditPanel(MOCK, {
+        onSessionEnd: () => window.close(),
+      });
+      LiquidGlassUI.toggleWarningState(true);
+    </script>
+  </body>
+</html>

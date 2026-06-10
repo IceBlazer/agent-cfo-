@@ -5,59 +5,178 @@
     <title>AgentCFO</title>
     <link rel="stylesheet" href="css/liquid-glass.css" />
     <style>
+      * { box-sizing: border-box; }
       body {
-        width: 320px;
+        width: 340px;
         margin: 0;
-        padding: 18px;
-        background: linear-gradient(165deg, var(--glass-sky), var(--glass-mint));
-        color: var(--glass-forest);
-        font-family: var(--glass-font);
+        padding: 0;
+        font-family: var(--font-human);
+        color: var(--forest-text);
+        background: linear-gradient(165deg, #dff6f8 0%, #c8f0dc 55%, #b8e8ef 100%);
       }
-      h1 { font-size: 1rem; margin: 10px 0 4px; }
-      p { font-size: 0.78rem; margin: 0 0 14px; color: var(--glass-forest-soft); line-height: 1.45; }
+      .popup-header {
+        padding: 18px 18px 14px;
+        background: linear-gradient(180deg, #b8f04a 0%, #4ecf6a 40%, #2a9d5c 100%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      }
+      .popup-header h1 {
+        margin: 8px 0 4px;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(26, 61, 50, 0.3);
+      }
+      .popup-header p {
+        margin: 0;
+        font-size: 0.76rem;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.4;
+      }
+      .popup-body { padding: 16px 18px 18px; }
+      .section-title {
+        margin: 0 0 10px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--aqua-deep);
+      }
+      .launch-grid {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .launch-btn {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1.5px solid rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: inset 0 1px 0 #fff, 0 4px 12px rgba(47, 95, 74, 0.08);
+        cursor: pointer;
+        font-family: var(--font-human);
+        transition: transform 0.15s ease;
+      }
+      .launch-btn:hover { transform: scale(1.02); }
+      .launch-btn strong {
+        display: block;
+        font-size: 0.86rem;
+        color: var(--forest-deep);
+        margin-bottom: 2px;
+      }
+      .launch-btn span {
+        font-size: 0.72rem;
+        color: var(--forest-text);
+        opacity: 0.85;
+      }
+      .launch-btn--primary {
+        background: linear-gradient(180deg, #7dcea0, #2a9d5c);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+      .launch-btn--primary strong,
+      .launch-btn--primary span { color: #fff; }
+      details {
+        margin-top: 4px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.85);
+        padding: 10px 12px;
+      }
+      summary {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--aqua-deep);
+        cursor: pointer;
+      }
       label {
         display: block;
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
-        color: var(--glass-leaf);
-        margin-bottom: 6px;
+        color: var(--aqua-deep);
+        margin: 10px 0 6px;
       }
-      .field { margin-bottom: 14px; }
       select, input {
         width: 100%;
-        box-sizing: border-box;
-        font-family: var(--glass-font);
-        font-size: 0.88rem;
-        padding: 10px 12px;
+        font-family: var(--font-human);
+        font-size: 0.86rem;
+        padding: 9px 11px;
         border-radius: 12px;
-        border: 1px solid var(--glass-line);
-        background: rgba(255, 255, 255, 0.7);
-        color: var(--glass-forest);
+        border: 1px solid rgba(93, 170, 123, 0.35);
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--forest-text);
       }
-      #save { width: 100%; margin-top: 4px; }
+      #save {
+        width: 100%;
+        margin-top: 12px;
+        padding: 11px;
+        border: none;
+        border-radius: 999px;
+        font-family: var(--font-human);
+        font-size: 0.84rem;
+        font-weight: 800;
+        color: #fff;
+        cursor: pointer;
+        background: linear-gradient(180deg, #7dcea0, #2a9d5c);
+      }
+      .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+        background: #ccc;
+        vertical-align: middle;
+      }
+      .status-dot--ok { background: var(--leaf-vibrant); box-shadow: 0 0 8px var(--leaf-vibrant); }
+      .status-dot--err { background: #e07060; }
+      #hub-status { font-size: 0.72rem; margin-top: 10px; opacity: 0.9; }
     </style>
   </head>
   <body>
-    <span class="ape-glass-badge">Thin Client</span>
-    <h1>AgentCFO Bridge</h1>
-    <p>Extension scrapes DOM only. Python hub runs Exa, Stripe, and OpenAI evaluators.</p>
+    <header class="popup-header">
+      <span class="ape-glass-badge">APE · Thin Client</span>
+      <h1>AgentCFO</h1>
+      <p>Launch the full Liquid Glass UI from here — not just settings.</p>
+    </header>
 
-    <div class="field">
-      <label for="apiBase">Python hub URL</label>
-      <input id="apiBase" type="text" value="http://127.0.0.1:8787" />
+    <div class="popup-body">
+      <p class="section-title">Open Frontend</p>
+      <div class="launch-grid">
+        <button type="button" id="launchDemo" class="launch-btn launch-btn--primary">
+          <strong>Live Demo Checkout</strong>
+          <span>Full intercept flow + Python audit</span>
+        </button>
+        <button type="button" id="previewUI" class="launch-btn">
+          <strong>Preview Hard-Wall UI</strong>
+          <span>Mock Exa / Stripe / DNA — no backend</span>
+        </button>
+        <button type="button" id="launchServerDemo" class="launch-btn">
+          <strong>HTTP Demo (content script test)</strong>
+          <span>Opens http://127.0.0.1:8787/demo</span>
+        </button>
+      </div>
+
+      <p id="hub-status"><span class="status-dot" id="hub-dot"></span><span id="hub-text">Checking Python hub…</span></p>
+
+      <details>
+        <summary>Settings</summary>
+        <label for="apiBase">Python hub URL</label>
+        <input id="apiBase" type="text" value="http://127.0.0.1:8787" />
+        <label for="riskTolerance">Backend timeout fallback</label>
+        <select id="riskTolerance">
+          <option value="fail-closed">Fail-closed (block + retry)</option>
+          <option value="fail-open">Fail-open (soft warning + proceed)</option>
+        </select>
+        <button type="button" id="save">Save Settings</button>
+      </details>
     </div>
-
-    <div class="field">
-      <label for="riskTolerance">Backend timeout fallback</label>
-      <select id="riskTolerance">
-        <option value="fail-closed">Fail-closed (block + retry)</option>
-        <option value="fail-open">Fail-open (soft warning + proceed)</option>
-      </select>
-    </div>
-
-    <button id="save" class="ape-glass-btn ape-glass-btn--primary">Save</button>
     <script src="popup.js"></script>
   </body>
 </html>

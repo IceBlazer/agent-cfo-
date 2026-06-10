@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AgentCFO — APE Procurement Gatekeeper",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Thin-client checkout interceptor — all intelligence runs on the Python APE backend.",
   "permissions": ["storage", "activeTab"],
   "host_permissions": [
